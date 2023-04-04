@@ -1,3 +1,4 @@
+# Workflow derived from https://github.com/r-lib/actions/tree/master/examples
 # https://docs.github.com/en/actions/learn-github-actions/reusing-workflows
 on:
   workflow_call:
@@ -17,8 +18,13 @@ name: pkgdown
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Only restrict concurrency for non-PR jobs
+    concurrency:
+      group: pkgdown-${{ github.event_name != 'pull_request' || github.run_id }}
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -28,8 +34,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
-          # extra-packages: any::pkgdown, local::.
-          extra-packages: github::r-lib/pkgdown, local::.
+          extra-packages: any::pkgdown, local::.
           needs: website
 
       - name: Build site
@@ -38,7 +43,7 @@ jobs:
           Rscript -e 'pkgdown::build_site(preview = FALSE, devel = FALSE)'
 
       - name: Upload site
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: website
           path: docs
@@ -52,7 +57,7 @@ jobs:
       COMMIT: ${{ inputs.COMMIT }}
     steps:
       - name: Download site
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: website
           path: docs
@@ -81,3 +86,4 @@ jobs:
           git add -A
           git commit -m "Built site for ${REPO}@$(echo ${COMMIT} | cut -c1-7)"
           git push origin gh-pages
+
