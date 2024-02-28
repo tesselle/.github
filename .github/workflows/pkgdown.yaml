@@ -24,7 +24,7 @@ jobs:
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - uses: r-lib/actions/setup-pandoc@v2
 
@@ -41,10 +41,10 @@ jobs:
       - name: Build site
         run: |
           Rscript -e 'install.packages("tekton", repos = "https://tesselle.r-universe.dev")'
-          Rscript -e 'pkgdown::build_site(preview = FALSE, devel = FALSE)'
+          Rscript -e 'pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE)'
 
       - name: Upload site
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: website
           path: docs
@@ -58,7 +58,7 @@ jobs:
       COMMIT: ${{ inputs.COMMIT }}
     steps:
       - name: Download site
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: website
           path: docs
